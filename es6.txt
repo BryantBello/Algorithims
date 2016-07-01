@@ -1,0 +1,258 @@
+* tutorial here: https://www.meteor.com/tutorials/react/temporary-ui-state
+* for atom install this package: language-jsx for syntax highlighting
+# ES6 primer for Meteor/React
+## lets
+* when making a variable
+  * with var, the variable is scoped within its nearest parent function
+  * without var, the variable is scoped to the global scope
+* works:
+```
+if (1 == 1){
+    var x = 3;
+}
+alert(x);
+```
+* doesn't work:
+```
+if (1 == 1){
+    let x = 3;
+}
+alert(x); //Uncaught ReferenceError: x is not defined
+```
+works:
+```
+if (1 == 1){
+    let x = 3;
+  alert(x);
+}
+```
+* no hoisting with lets, thank god, because hoisting is stupid.
+```
+console.log(v);             // undefined
+console.log(typeof v);  // "undefined"
+var v = 42;
+console.log(v);             // 42
+console.log(x);             // ReferenceError!
+console.log(typeof x);  // ReferenceError!
+let x = 42;
+console.log(x);             // 42
+```
+* old way
+```
+for ( let i = 0; i < 5; i++ ) {
+        // Use i all you want
+}
+console.log(i); //gives you 4
+```
+* new way: much better. You can be sure that you won't deal with weird errors by having multiple for loops
+```
+for ( let i = 0; i < 5; i++ ) {
+        // Use i all you want
+}
+console.log(i); //gives you: Uncaught ReferenceError: i is not defined
+```
+with let (from es6), there is much tighter scoping than es5. The variable only exists within the if statement!
+let is much more powerful than the traditional var declaration for a variable.
+## consts
+* consts have the same scoping rules as lets
+* this does not mean constant value
+* const means a constant reference to the value
+* works
+```
+var cats = ['meeses', 'bobbi', 'sylvester'];
+cats.push('Sprinkles');
+console.log(cats);
+cats = [ 'whiskers', 'mr. tuxedo' ];
+console.log(cats);
+```
+* doesn't work
+```
+const cats = ['meeses', 'bobbi', 'sylvester'];
+cats.push('Sprinkles');
+console.log(cats);
+cats = [ 'whiskers', 'mr. tuxedo' ]; // Uncaught TypeError: Identifier 'cats' has already been declared
+```
+```
+const num = 3;
+num++; //Uncaught TypeError: Assignment to constant variable.
+```
+## when to use vars?
+* never
+* you only use var in legacy code
+## classes
+* At this time, there isn’t any advantage to using classes over prototypes other than better syntax.
+* old way
+```
+function Vehicle(make, year) {
+  this.make = make;
+  this.year = year;
+}
+//adding a function to it
+Vehicle.prototype.fullName = function() {
+  return this.make + ' ' + this.year;
+}
+var vehicle = new Vehicle('STEYR PUCH Pinzgauer', 1987);
+console.log(vehicle.make); // STEYR PUCH Pinzgauer
+console.log(vehicle.fullName()) // STEYR PUCH Pinzgauer 1987
+vehicle.make = 'Subaru WRX';
+console.log(vehicle.make); //Subaru WRX
+```
+* new way
+```
+class Vehicle {
+  constructor(make, year) {
+    this._make = make;
+    this._year = year;
+  }
+  get make() {
+    return this._make;
+  }
+  get year() {
+    return this._year;
+  }
+  fullName() {
+    return `${this.make} ${this.year}`;
+  }
+}
+var vehicle = new Vehicle('STEYR PUCH Pinzgauer', 1987);
+console.log(vehicle.make); // STEYR PUCH Pinzgauer
+console.log(vehicle.fullName()) // STEYR PUCH Pinzgauer 1987
+vehicle.make = 'Subaru WRX';
+console.log(vehicle.make); //Subaru WRX
+```
+### classes and hoisting
+* One important thing to note here is that unlike function declarations, class declarations can’t be hoisted. For example, this code works fine:
+```
+console.log(helloWorld());
+function helloWorld() {
+  return "Hello World";
+}
+```
+However, the following is going to throw an exception:
+```
+var vehicle = new Vehicle();
+class Vehicle() {
+}
+```
+### class extending
+we created a vehicle before. Let's say we want to make a motorcycle constructor function, but, since it's similar . It's similar to a vehicle.
+* this is a mess
+```
+function Motorcycle(make, year) {
+  Vehicle.apply(this, [make, year]);
+}
+Motorcycle.prototype = Object.create(Vehicle.prototype, {
+  fullName: function() {
+    return 'Motorcycle ' + this.make + ' ' + this.year;
+  }
+});
+Motorcycle.prototype.constructor = Motorcycle;
+```
+* With the new extends keyword same example looks a lot more digestible:
+```
+class Motorcycle extends Vehicle {
+  constructor(make, year) {
+    super(make, year); //use super when you want to call functions of the object’s parent. I don't want to re-write this function. I just want to use Vehicle's constructor function.
+  }
+  fullName() {
+    return 'Motorcycle ${this.make} ${this.year}';
+  }
+}
+```
+## modules
+* A JavaScript module is a file that exports something for other modules to consume.
+* Unlike classical JavaScript, when using modules you don’t have to worry about polluting the global scope.
+*  In fact, the problem is quite the opposite – you have to import everything you need to use into every module. The later, however, is a much better idea because you can clearly see all of the dependencies used in each module.
+### naming modules
+The name of a module comes from either the file or the folder name and you can omit the .js extension in both cases. Here’s how this works:
+If you have a file named utils.js, you can import it via the ./utils relative path.
+If you have a file named ./utils/index.js, you refer to it via ./utils/index or simply ./utils. This allows you to have a bunch of files in a folder and import them as a single module.
+## modules the point
+Most modules export some functionality for other modules to import using the new ES2015 export and import keywords
+A module can export and import one or more variables of any type, be that a Function, Object, String, Number, Boolean and so on.
+* old way
+```
+// hello.js
+module.exports = function() {}
+// main.js
+var helloWorld = require('./hello-world');
+var anotherFunction = require('./hello-world');
+helloWorld();
+console.log(helloWorld === anotherFunction);
+```
+* new way
+```
+// hello-world.js
+export default function() {}
+// main.js
+import helloWorld from './hello-world';
+import anotherFunction from './hello-world';
+helloWorld();
+console.log(helloWorld === anotherFunction);
+```
+### importing everything
+* old way
+```
+// module.js
+module.exports.default = 3.14;
+module.exports.table = {foo: 'bar'};
+module.exports.hello = function () {};
+// main.js
+var module = require('./module');
+console.log(module.default);
+console.log(module.table);
+console.log(module.hello());
+```
+* new way:
+```
+// module.js
+export default 3.14;
+export const table = {foo: 'bar'};
+export function hello() {};
+// main.js
+import * as module from './module';
+console.log(module.default);
+console.log(module.table);
+console.log(module.hello());
+```
+### exporting everything
+* old way
+```
+// module.js
+module.exports.table = {foo: 'bar'};
+module.exports.hello = function () {};
+// main.js
+module.exports = require('./module');
+module.exports.hello = require('./module').hello;
+module.exports.foo = require('./module').hello;
+```
+* new way
+```
+// module.js
+const PI = 3.14;
+const value = 42;
+export const table = {foo: 'bar'};
+export function hello() {};
+// main.js
+export * from './module';
+export {hello} from './module';
+export {hello as foo} from './module';
+```
+## string interpolation
+* the old way
+```
+$("#result").append(
+    "There are <b>" + basket.count + "</b> " +
+    "items in your basket, " +
+    "<em>" + basket.onSale +
+"</em> are on sale!"
+);
+```
+* the new way
+```
+$("#result").append(`
+    There are <b>${basket.count}</b> items
+   in your basket, <em>${basket.onSale}</em>
+are on sale!
+`);
+```
