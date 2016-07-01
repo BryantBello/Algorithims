@@ -28,3 +28,32 @@ describe('spread with strings', () => {
   });
   
 });
+
+ describe('multiple `catch`es', () => {
+    it('only the first `catch` is called', () => {
+      const p = Promise.reject('1');
+      const p1 = p
+          .catch(reason => void 0)
+          .catch(reason => `${reason} AND 3`)
+        ;
+
+      return p1.then(result =>
+        assert.equal(result, '1 AND 2')
+      );
+    });
+
+    it('if a `catch` throws, the next `catch` catches it', () => {
+      const p = Promise.reject('1');
+      const p1 = p
+          .catch(reason => { throw Error(`${reason} AND 2`) })
+          .catch(err => { throw Error(`${err.message} AND 3`) })
+          .catch(err => `${err} but NOT THIS`)
+        ;
+
+      return p1.then(result =>
+        assert.equal(result, '1 AND 2 AND 3')
+      );
+    });
+  });
+
+});
