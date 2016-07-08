@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Object Literals</title>
+</head>
+<body>
+<script type="text/javascript">
+var myModule = (function() {
+    var counter = 0;
+    runAjax = function() {
+        return "AJAX Function Run..."
+    };
+    runBjax = function() {
+        return "BJAX Function Run..."
+    };
+    return {
+        runCjax: function(){
+            return "CJAX Function Run..."
+        }
+    }
+})();
+// Open Sesame!
+console.log(myModule.runCjax());
+// Blocked my friend!
+console.log(myModule.runAjax());
+console.log(myModule.runBjax());
+</script>
+
+</body>
+</html>
